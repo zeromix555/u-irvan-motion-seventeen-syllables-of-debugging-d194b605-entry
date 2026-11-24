@@ -1,6 +1,6 @@
 // Seventeen Syllables of Debugging — make.fun entry.
 // Writes one haiku (5-7-5, at most 200 characters) to /output/entry.txt.
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const TEXT =
   "A breakpoint glows red\nthe stack trace scrolls past midnight\nand the bug was me";
@@ -35,3 +35,10 @@ LINES.forEach((line, i) => {
 
 mkdirSync("/output", { recursive: true });
 writeFileSync("/output/entry.txt", TEXT, "utf8");
+
+// Read-back verification: the file on disk must be byte-identical to the
+// checked text, so a partial write can never ship a truncated haiku.
+const written = readFileSync("/output/entry.txt", "utf8");
+if (written !== TEXT) {
+  throw new Error("read-back mismatch: /output/entry.txt differs from the checked haiku");
+}
